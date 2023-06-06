@@ -1,5 +1,11 @@
 import { Component } from '@angular/core';
-import { FormBuilder, Validators, FormGroup, FormArray } from '@angular/forms';
+import {
+  FormBuilder,
+  Validators,
+  FormGroup,
+  FormArray,
+  FormControl,
+} from '@angular/forms';
 
 @Component({
   templateUrl: './dinamic-page.component.html',
@@ -18,6 +24,8 @@ export class DinamicPageComponent {
     ]),
   });
 
+  public newFavorite: FormControl = new FormControl('', [Validators.required]);
+
   public onSubmit(): void {
     if (this.myForm.invalid) {
       this.myForm.markAllAsTouched();
@@ -25,7 +33,26 @@ export class DinamicPageComponent {
     }
 
     console.log(this.myForm.value);
+    (this.myForm.controls['favorites'] as FormArray) = this._formBuilder.array(
+      []
+    );
     this.myForm.reset();
+  }
+
+  public onAddToFavorites(): void {
+    if (this.newFavorite.invalid) return;
+
+    const newGame = this.newFavorite.value;
+
+    this.favorites.push(
+      this._formBuilder.control(newGame, Validators.required)
+    );
+
+    this.newFavorite.reset();
+  }
+
+  public onDeleteFavorite(index: number): void {
+    this.favorites.removeAt(index);
   }
 
   get favorites() {
@@ -35,6 +62,12 @@ export class DinamicPageComponent {
   public isValidField(field: string): boolean | null {
     return (
       this.myForm.controls[field].errors && this.myForm.controls[field].touched
+    );
+  }
+
+  public validFieldArray(formArray: FormArray, index: number) {
+    return (
+      formArray.controls[index].errors && formArray.controls[index].touched
     );
   }
 
